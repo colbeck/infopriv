@@ -1,0 +1,111 @@
+\documentclass[12pt]{article}
+
+% Prevent words to overflow over the margin
+% \sloppy  % Alternative command
+\emergencystretch 3em
+
+% Math
+% the journal version already loads these packages
+\usepackage{amsmath,amssymb,amsthm}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% Images and plots
+\usepackage{subfig}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\usepackage{pgfplots}
+
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+\usepackage[noend]{algpseudocode} % Avoid "end" and make it look cleaner
+
+\usepackage[margin=1in]{geometry}
+% Tables
+\usepackage{csvsimple}	% reading CSV files in tables
+\usepackage{booktabs}   % Nicer Tables
+\usepackage{adjustbox}  % To adjust table length
+\usepackage{appendix}
+\usepackage{multicol}
+% Hyper-references
+\usepackage{hyperref}
+
+
+% Acronyms
+\usepackage[xindy, acronyms]{glossaries}   % Glossaries and Acronyms
+\makeglossaries
+
+% Other 
+\usepackage[textsize=tiny, color=blue!20]{todonotes}
+\newcommand{\AAANote}[1]{\todo[inline, caption={}]{ Amirali: #1}}
+\newcommand{\ColeNote}[1]{\todo[inline, caption={}]{ Cole: #1}}
+\newcommand{\priv}{\text{IPT}}
+
+% Definitions
+\input{definitions.tex}
+
+
+
+
+\begin{document}
+
+
+
+\title{Information Privacy Tradeoff}
+\author{Amir Ali Ahmadi and Cole Becker}
+\date{September 2022}
+\maketitle
+
+\section{The Problem}
+We consider the following decision problem, we denote \gls{IPT}
+\paragraph{Input:}
+Consider a dataset $\mc{D} = \{d_i\}_{i\leq m} \sbs \mr^n$ where $d_i \in \{0,1\}^n$, and denote $D\in \mr^{m\times n}$ as the matrix containing this data. We can imagine for example that $m$ is the number of people in the dataset, and $d_i\in \mr^n$ represents a binary feature vector of information on $n$ features for the $i$th person. In addition, you are given a non-negative weight vector $w\in \mr^n$ representing the relative importance of each the $n$ features, some number $r \in (0,1)$ and an index $k \in \{1,...,m\}$. Finally we also take in a non-negative number $l \in \mr$.
+\paragraph{Question:}
+Is there a way to select a subset of features of $d_k$, indexed by $x\in \{0,1\}^n$ such that $w^T x \geq l$ and the subset features of $d_k$ are shared by at least $rm$ people in the dataset ($d_k$ included).
+
+\subsection{Formulation of \gls{IPT}}
+Taking all the same inputs from the above problem, let us first define a helper matrix $K \in \mr^{m\times n}$ as
+\begin{align*}
+    K_{ij} = \begin{cases}
+        0 & \text{ if } D_{ij} = D_{kj} = (d_k)_j\\
+        1 & \text{ otherwise}
+    \end{cases}
+\end{align*} 
+We note that \gls{IPT} can be reduced to the following non-convex optimization problem
+\begin{equation}
+	\label{eq:priv_k} 
+    \tag{$\priv_k$} 
+	\begin{array}{lll}
+		\priv_k = & \underset{x}{\text{maximize}} & w^T x \\
+		& \mbox{subject to} & ||K x||_{0}  < m(1-r) \\
+        && x_i \in \{0,1\}
+		\end{array}
+\end{equation}
+where the answer to the decision question is given by whether $\priv_k \geq l$. To see why the constraint in this problem is equivalent to the requirement that the subset $x$ of $d_k$'s features is shared by at least $rm$ people, note that  \[(Kx)_i = \begin{cases}
+    0 & \text{ if } d_i \text{ shares the same } x \text{ features with } d_k \\
+    > 0 & \text{ otherwise}
+\end{cases}
+\]
+so the number of 0-elements in $Kx$ must be greater than $mr$ or equivalently, the number of non-zero elements must be less than $m(1-r)$ 
+\paragraph{Convex Upper Bound}
+
+\subsection{Complexity of \gls{IPT}}
+Consider the \gls{KNAP}:
+\paragraph{Input:}
+
+\paragraph{Question}
+
+\section{Other questions to consider}
+\begin{enumerate}
+    \item given an $r$,$w$,$D$, what is $\priv = \min_k \priv_k$
+\end{enumerate}
+
+% \begin{singlespace}
+\bibliography{bibliography}
+% \end{singlespace}
+
+
+\end{document}
+
