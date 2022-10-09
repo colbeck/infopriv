@@ -110,7 +110,7 @@ we can then write an \gls{LP} relaxation of \gls{IPT} as the following problem
     \tag{$\privl$} 
 	\begin{array}{lll}
 		\privl = & \underset{x}{\text{maximize}} & w^T x \\
-		& \mbox{subject to} & rm 1^Tx - 1^TKx \leq 0 \\
+		& \mbox{subject to} & rm 1^Tx - 1^T\bar{K}x \leq 0 \\
         && 0\leq x \leq 1
 		\end{array}
 \end{equation}
@@ -166,8 +166,8 @@ rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$.
         Notice the problem construction requires a polynomial amount of operations, as the size of $D = n * (1+ 1^T w)$, and everything else requires an affine amount of operations.
         We would now like to show the following equivalence between the problems. 
         \[\text{\gls{KNAP}} \geq P \iff \text{IPT(KNAP)} \geq P\]
-       (\underline{$\Longrightarrow$}): Consider a solution $\hat{x}\in \{0,1\}^n$ to \gls{KNAP} satisfying the weight constraints and with $p^Tx \geq P$. This same solution $\hat{x}$ will be feasible to IPT(KNAP). To see why, just note that $||Dx||_0 = w^Tx$ is equivalent to taking the sum of the weights. \\
-       (\underline{$\Longleftarrow$}): The backwards argument is the same.  
+       (\underline{$\Longrightarrow$}): Consider a solution $\hat{x}\in \{0,1\}^n$ to \gls{KNAP} satisfying the weight constraints and with $p^Tx \geq P$. This same solution $\hat{x}$ will be feasible to IPT(KNAP). To see why, just note that $||Dx||_0 = w^Tx$ is equivalent to taking the sum of the weights, because the construction of $D$ and $x$ mean that $||Dx||_0 = 1^TDx$ and $1^TD = w$ by construction. \\
+       (\underline{$\Longleftarrow$}): The backwards argument is similar, but we need to build back the weight vector $w$ from the matrix $D$. To do so we again note that $w = 1^TD$, and then the problem is identical to knapsack.
     \end{enumerate}
 \end{proof}
 
