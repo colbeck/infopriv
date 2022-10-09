@@ -42,6 +42,7 @@
 \newcommand{\AAANote}[1]{\todo[inline, caption={}]{ Amirali: #1}}
 \newcommand{\ColeNote}[1]{\todo[inline, caption={}]{ Cole: #1}}
 \newcommand{\priv}{\text{IPT}}
+\newcommand{\privl}{\text{IPT}^\text{LP}}
 
 % Definitions
 \input{definitions.tex}
@@ -61,9 +62,12 @@
 \section{The Problem}
 We consider the following decision problem, we denote \gls{IPT}
 \paragraph{Input:}
-Consider a dataset $\mc{D} = \{d_i\}_{i\leq m} \sbs \mr^n$ where $d_i \in \{0,1\}^n$, and denote $D\in \mr^{m\times n}$ as the matrix containing this data. We can imagine for example that $m$ is the number of people in the dataset, and $d_i\in \mr^n$ represents a binary feature vector of information on $n$ features for the $i$th person. In addition, you are given a non-negative weight vector $w\in \mr^n$ representing the relative importance of each the $n$ features, some number $r \in (0,1)$ and an index $k \in \{1,...,m\}$. Finally we also take in a non-negative number $l \in \mr$.
+Consider a dataset $\mc{D} = \{d_i\}_{i\leq m} \sbs \mr^n$ where $d_i \in \{0,1\}^n$, and denote $D\in \mr^{m\times n}$ as the matrix containing this data. We can imagine for example that $m$ is the number of people in the dataset, and $d_i\in \mr^n$ represents a binary feature vector of information on $n$ features for the $i$th person. In addition, you are given a non-negative weight vector $w\in \mr^n$ representing the relative importance of each the $n$ features, some number $r \in [0,1]$ and an index $k \in \{1,...,m\}$. Finally we also take in a non-negative number $l \in \mr$.
 \paragraph{Question:}
 Is there a way to select a subset of features of $d_k$, indexed by $x\in \{0,1\}^n$ such that $w^T x \geq l$ and the subset features of $d_k$ are shared by at least $rm$ people in the dataset ($d_k$ included).
+\subsection{Motivation}
+Suppose you are a company holding such a dataset $\mc{D}$ about various attributes of a large quantity of individuals. Some advertising company Ad.co comes to you, and wants to purchase the data of some individual $k$ to run some targeted advertising of their own. In order to convey which features they are most interested in knowing, or which features are most useful to their advertising campaign, they supply you with a weight vector $w$ which represents how much Ad.co cares about knowing each feature of individual $k$ in your dataset. However, as your company must comply with privacy regulations, you are not allowed to share too much information about individual $k$ which would distinguish them too much. Specifically, the features you reveal to Ad.co about individual $k$ must also be shared by $100 * r\%$ of the members of your dataset. Your task is to maximize the useful information you can share with Ad.co while satisfying the imposed privacy constraints.
+
 
 \subsection{Formulation of \gls{IPT}}
 Taking all the same inputs from the above problem, let us first define a helper matrix $K \in \mr^{m\times n}$ as
@@ -75,31 +79,105 @@ Taking all the same inputs from the above problem, let us first define a helper 
 \end{align*} 
 We note that \gls{IPT} can be reduced to the following non-convex optimization problem
 \begin{equation}
-	\label{eq:priv_k} 
-    \tag{$\priv_k$} 
+	\label{eq:priv} 
+    \tag{$\priv$} 
 	\begin{array}{lll}
-		\priv_k = & \underset{x}{\text{maximize}} & w^T x \\
+		\priv = & \underset{x}{\text{maximize}} & w^T x \\
 		& \mbox{subject to} & ||K x||_{0}  < m(1-r) \\
         && x_i \in \{0,1\}
 		\end{array}
 \end{equation}
-where the answer to the decision question is given by whether $\priv_k \geq l$. To see why the constraint in this problem is equivalent to the requirement that the subset $x$ of $d_k$'s features is shared by at least $rm$ people, note that  \[(Kx)_i = \begin{cases}
+where the answer to the decision question is given by whether $\priv \geq l$. To see why the constraint in this problem is equivalent to the requirement that the subset $x$ of $d_k$'s features is shared by at least $rm$ people, note that  \[(Kx)_i = \begin{cases}
     0 & \text{ if } d_i \text{ shares the same } x \text{ features with } d_k \\
     > 0 & \text{ otherwise}
 \end{cases}
 \]
 so the number of 0-elements in $Kx$ must be greater than $mr$ or equivalently, the number of non-zero elements must be less than $m(1-r)$ 
+
+
+
 \paragraph{Convex Upper Bound}
+Define $\bar{K}$ as the matrix with the entries in $K$ flipped, i.e.
+\begin{align*}
+    \bar{K}_{ij} = \begin{cases}
+        1 & \text{ if } D_{ij} = D_{kj} = (d_k)_j\\
+        0 & \text{ otherwise}
+    \end{cases}
+\end{align*} 
+we can then write an \gls{LP} relaxation of \gls{IPT} as the following problem
+\begin{equation}
+	\label{eq:privs_k} 
+    \tag{$\privl$} 
+	\begin{array}{lll}
+		\privl = & \underset{x}{\text{maximize}} & w^T x \\
+		& \mbox{subject to} & rm 1^Tx - 1^TKx \leq 0 \\
+        && 0\leq x \leq 1
+		\end{array}
+\end{equation}
+Where we have $\priv \leq \privl$. To see why take any feasible $x$ to \eqref{eq:priv}, and consider an indicator vector $y \in \mr^m$ with 
+$y_i = 1$ if $d_i$ and $d_k$ share the same $x$ features and $0$ otherwise. We want to ensure that $1^T y \geq rm$. However we claim that $\frac{1^T \bar{K}x}{1^Tx} \geq 1^T y$. To see why, note that $(\bar{K}x)_i$ counts the number of features out of $x$ that $d_i$ and $d_k$ share, so 
+\[\left(\frac{\bar{K}x}{1^T x}\right)_i = 
+\begin{cases}
+    1 & \text{ if } d_i \text{ shares the same } x \text{ features with } d_k \\
+    \in [0,1) & \text{ otherwise}
+\end{cases}\]
+rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$. 
+
+
 
 \subsection{Complexity of \gls{IPT}}
-Consider the \gls{KNAP}:
-\paragraph{Input:}
-
-\paragraph{Question}
+\begin{theorem}
+    \gls{IPT} is NP-complete
+\end{theorem}
+\begin{proof}
+    It is sufficient to show that \gls{IPT} $\in $ NP and that \gls{KNAP} $ \longrightarrow$  \gls{IPT}
+    \begin{enumerate}
+        \item \gls{IPT} $\in $ NP: Given a certificate solution $x^*$ to $\priv$, it is easy to check that the constraints are satisfied, and that $w^T x^* \geq l$
+        \item \gls{KNAP} $ \longrightarrow$  \gls{IPT}: Consider the classic \gls{KNAP}:
+        \\ \tb{Input:}
+        \textit{$w \in \mr^n$ a weight vector of $n$ items, $p \in \mr^n$ a price vector for the items, $W\in \mr$ a weight capacity, and $P \in \mr$}
+        \\ \tb{Question:}
+        \textit{Is there a set of items of combined weight less than $W$ but with combined price greater than $P$?}
+        \\~\\ 
+        Using these inputs we will construct an instance of \gls{IPT} (Note we will assume for convenience that $W \in [0,1^Tw]$). To begin, set $m = 1+ 1^Tw$ and construct the following data matrix $D \in \mr^{m\times n}$ by the following procedure:
+        \begin{enumerate}
+            \item Set the first row of $D$ to a row of all $0$s
+            \item For each weight $w_i$, $i\in\{1,...,n\}$ add $w_i$ copies of the one hot encoded row vector $e_i$. As an example:
+            \[w = [3,1,2,1] \implies D = \begin{bmatrix}
+                0&0&0&0 \\
+                1&0&0&0 \\
+                1&0&0&0 \\
+                1&0&0&0 \\
+                0&1&0&0 \\
+                0&0&1&0 \\
+                0&0&1&0 \\
+                0&0&0&1 
+            \end{bmatrix}\]
+            This is the data matrix $D$ we will consider. Note that there auxiliary matrix $K$ used in \gls{IPT} is identical to $D$ via the way we constructed it.
+        \end{enumerate}
+        In addition, set $r = 1 - W/m$ (whereby assumption on $W$ we have $r \in [0,1]$), $l = P$, $k = 1$ the first row, and $\bar{w} = p$, the information weighting vector. We now have an instance of \gls{IPT}. In terms of the \gls{KNAP} variables, the equivalent \gls{IPT} problem looks like the following:
+        \begin{equation}
+            \begin{array}{lll}
+                \priv(\text{KNAP}) = & \underset{x}{\text{maximize}} & p^T x \\
+                & \mbox{subject to} & ||D x||_{0}  < W \\
+                && x_i \in \{0,1\}
+                \end{array}
+        \end{equation}
+        Notice the problem construction requires a polynomial amount of operations, as the size of $D = n * (1+ 1^T w)$, and everything else requires an affine amount of operations.
+        We would now like to show the following equivalence between the problems. 
+        \[\text{\gls{KNAP}} \geq P \iff \text{IPT(KNAP)} \geq P\]
+       (\underline{$\Longrightarrow$}): Consider a solution $\hat{x}\in \{0,1\}^n$ to \gls{KNAP} satisfying the weight constraints and with $p^Tx \geq P$. This same solution $\hat{x}$ will be feasible to IPT(KNAP). To see why, just note that $||Dx||_0 = w^Tx$ is equivalent to taking the sum of the weights. \\
+       (\underline{$\Longleftarrow$}): The backwards argument is the same.  
+    \end{enumerate}
+\end{proof}
 
 \section{Other questions to consider}
 \begin{enumerate}
-    \item given an $r$,$w$,$D$, what is $\priv = \min_k \priv_k$
+    \item Given an $r$,$w$,$D$, how would we go about calculating \gls{GIPT} $= \min_k \priv$ 
+    \item what algorithms to consider in order to give a lower bound on \gls{IPT}
+    \\ \tb{Idea:} for any column $c_i$ of matrix $\bar{K}$, define its value $v(c_i) = (1^T c_i) w_i$ and order the columns from largest to smallest value, then perform a greedy selection algorithm by selecting the columns with the largest value up until the privacy constraint is violated. Could make sense because we both want to select columns which are weighted highly and who share features with the $k$th column
+    \ColeNote{In a similar essence to question 1 on the 2016 ORF 363 Final}
+    \item are there tighter upper bounds on \gls{IPT} than the LP one above
 \end{enumerate}
 
 % \begin{singlespace}
