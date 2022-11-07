@@ -115,13 +115,18 @@ we can then write an \gls{LP} relaxation of \gls{IPT} as the following problem
 		\end{array}
 \end{equation}
 Where we have $\priv \leq \privl$. To see why take any feasible $x$ to \eqref{eq:priv}, and consider an indicator vector $y \in \mr^m$ with 
-$y_i = 1$ if $d_i$ and $d_k$ share the same $x$ features and $0$ otherwise. We want to ensure that $1^T y \geq rm$. However we claim that $\frac{1^T \bar{K}x}{1^Tx} \geq 1^T y$. To see why, note that $(\bar{K}x)_i$ counts the number of features out of $x$ that $d_i$ and $d_k$ share, so 
+\[y_i = \begin{cases}
+     1 & \text{ if } d_i \text{ shares the same } x \text{ features with } d_k \\
+    0 & \text{ otherwise.}
+\end{cases}
+\]
+ We want to ensure that $1^T y \geq rm$. However we claim that $\frac{1^T \bar{K}x}{1^Tx} \geq 1^T y$. To see why, note that $(\bar{K}x)_i$ counts the number of features out of $x$ that $d_i$ and $d_k$ share, so 
 \[\left(\frac{\bar{K}x}{1^T x}\right)_i = 
 \begin{cases}
     1 & \text{ if } d_i \text{ shares the same } x \text{ features with } d_k \\
     \in [0,1) & \text{ otherwise}
 \end{cases}\]
-rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$. 
+Of course to be sure that at least $rm$ individuals share the same features as the $d_k$th individual, we can sum to get $\frac{1^T\bar{K}x}{1^T x} \geq 1^Ty \geq rm$, and we get the constraint in $\privl$. 
 
 
 
@@ -139,7 +144,7 @@ rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$.
         \\ \tb{Question:}
         \textit{Is there a set of items of combined weight less than $W$ but with combined price greater than $P$?}
         \\~\\ 
-        Using these inputs we will construct an instance of \gls{IPT} (Note we will assume for convenience that $W \in [0,1^Tw]$). To begin, set $m = 1+ 1^Tw$ and construct the following data matrix $D \in \mr^{m\times n}$ by the following procedure:
+        Using these inputs we will construct an instance of \gls{IPT} (Note we will assume for convenience that $W \in [0,1^Tw]$. If not we can define a new $W$ that is respective endpoint). To begin, set $m = 1+ 1^Tw$ and construct the following data matrix $D \in \mr^{m\times n}$ by the following procedure:
         \begin{enumerate}
             \item Set the first row of $D$ to a row of all $0$s
             \item For each weight $w_i$, $i\in\{1,...,n\}$ add $w_i$ copies of the one hot encoded row vector $e_i$. As an example:
@@ -153,7 +158,7 @@ rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$.
                 0&0&1&0 \\
                 0&0&0&1 
             \end{bmatrix}\]
-            This is the data matrix $D$ we will consider. Note that there auxiliary matrix $K$ used in \gls{IPT} is identical to $D$ via the way we constructed it.
+            This is the data matrix $D$ we will consider. Note that the auxiliary matrix $K$ used in \gls{IPT} is identical to $D$ via the way we constructed it.
         \end{enumerate}
         In addition, set $r = 1 - W/m$ (whereby assumption on $W$ we have $r \in [0,1]$), $l = P$, $k = 1$ the first row, and $\bar{w} = p$, the information weighting vector. We now have an instance of \gls{IPT}. In terms of the \gls{KNAP} variables, the equivalent \gls{IPT} problem looks like the following:
         \begin{equation}
@@ -175,9 +180,18 @@ rearranging $\frac{\bar{K}x}{1^T x} \geq rm$ we get the constraint in $\privl$.
 \begin{enumerate}
     \item Given an $r$,$w$,$D$, how would we go about calculating \gls{GIPT} $= \min_k \priv$ 
     \item what algorithms to consider in order to give a lower bound on \gls{IPT}
-    \\ \tb{Idea:} for any column $c_i$ of matrix $\bar{K}$, define its value $v(c_i) = (1^T c_i) w_i$ and order the columns from largest to smallest value, then perform a greedy selection algorithm by selecting the columns with the largest value up until the privacy constraint is violated. Could make sense because we both want to select columns which are weighted highly and who share features with the $k$th column
+    \\ \tb{Idea:} for any column $\bar{K}_i$ of matrix $\bar{K}$, define its value \[v(\bar{K}_i) = (1^T \bar{K}_i) w_i\] and order the columns from largest to smallest value, then perform a greedy selection algorithm by selecting the columns with the largest value up until the privacy constraint is violated. Could make sense because we both want to select columns which are weighted highly and who share features with the $k$th column
     \ColeNote{In a similar essence to question 1 on the 2016 ORF 363 Final}
     \item are there tighter upper bounds on \gls{IPT} than the LP one above
+\end{enumerate}
+
+\section*{To Do}:
+
+\begin{enumerate}
+    \item \underline{SDP (tighter) relaxation}: Think about SDP relaxation for entire problem, by considering the SDP relaxation for an integer constraint, and seeing if there is an interpretation in the 0-norm part of the problem
+    \item \underline{Better Algorithm}: Can well known "Dynamic Programming" algorithm for knapsack be generalized to \gls{IPT}
+    \item \underline{Better LP relaxation/Bridge between relaxation \& algorithm}: Jeff's 2016 ORF 363 Final problem, is there a way to draw a connection between LP relaxation and the greedy algorithm (i.e. recall that the greedy algorithm for knapsack was equivalent to LP relaxation and pushing inequalities to equalities etc.)
+    \item \underline{Solving original problem}: Oktay Gunluk has written IP formulations of $l_0$ norm.
 \end{enumerate}
 
 % \begin{singlespace}
