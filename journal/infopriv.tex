@@ -232,7 +232,7 @@ However if we define $\alpha := \mathbf{1}^TK$, then we can interpret \ref{eq:pr
 Where we he have three individuals (call them A,B,C) aside from \gls{poi} (row 1) and three features. We can view the items in our knapsack $\alpha = \mathbf{1}^TK$ as the following objects (one for each of the three features).
 \begin{figure}[H]
     \centering
-    \includegraphics[width = 14cm]{images/knap_intuition.pdf}
+    \includegraphics[width = 14cm]{../images/knap_intuition.pdf}
     \label{fig:items}
 \end{figure}
 Here we only select the first two items $x = [1,1,0]^T$, so the weight of our knapsack $\mathbf{1}^TKx = \alpha^Tx = 4$. However, there are only three unique individuals in our knapsack, as we double count $B$. In order to only count $B$ once, we just take $||Kx||_0 = 3$ (i.e. count the number of non-zeros)
@@ -248,7 +248,7 @@ Here we only select the first two items $x = [1,1,0]^T$, so the weight of our kn
 %     \alpha_i = (\mathbf{1}^TK)_i &= \text{ number of }
 % \end{align*}
 
-\subsection{Convex Bounds}
+\subsection{Polynomial-time Upper Bounds}
 \subsubsection{SDP Upper bound}
 Consider the following SDP:
 \begin{equation}
@@ -278,7 +278,7 @@ Consider the following SDP:
         && 0 \leq x,y \leq 1
 		\end{array}
 \end{equation}
-To see wh $\priv \leq \privsdp$, we would like to show that
+To see why $\priv \leq \privsdp$, we would like to show that
 \[x^* \text{ feasible to } \priv \implies \exists x,y,X,Z,Y \text{ feasible to }\privsdp\] 
 Take $x^*$ feasible to $\priv$ and let $x = x^*$. Next define a vector $y \in \mr^n$ with each entry define as
 \[y_i = \begin{cases}
