@@ -1,16 +1,11 @@
 import numpy as np
 import numpy.random as npr
+from utils import make_D_rho
 import cvxpy as cp
 import time
 import matplotlib.pyplot as plt
 
 # Matrix Generation
-def rand_01_mat(m,n):
-    return npr.randint(0,2,size = (m,n))
-
-def rand_01_col_mat(m,n):
-    prob = npr.rand(n)
-    return npr.binomial(1,prob, size = (m,n))
 
 # MISP
 def misp(D_rho, w, r):
@@ -74,8 +69,8 @@ def misp_grp_lp(D, w, r):
     
     obj = cp.Minimize(w @ x)
     for rho in range(m):
-        D_rho = np.delete(np.abs(D - D[rho,:]), rho, axis = 0)
-        y_rho = cp.Variable(m - 1, boolean=True)
+        D_rho = make_D_rho(D, rho)
+        y_rho = cp.Variable(m - 1)
         cons += [D_rho @ x >= y_rho, cp.sum(y_rho) >= m-r-1]
         cons += [y_rho >= 0, y_rho <= 1]
         for j in range(m - 1):
@@ -126,6 +121,9 @@ def misp_sdp(D_rho, w, r, feas = False, x_test = True):
             if np.allclose(D_rho[j,i], 1):
                 cons += [X[i,n+j] == X[n+m,i]]
                 cons += [X[n+m,n+j] >= X[n+m,i]]
+                # cons += [X[n+j,n+j] - 2 * X[i, n+j] + X[i,i] >= 0] # (3,3)
+                # cons += [X[i, n+j] <= X[n+j,n+j]]
+                # cons += [X[i, n+j] <= X[i,i]]
     cons += [X >= 0, X <= 1]
     cons += [D_rho @ X[n+m,:n] >= X[n+m,n:n+m]]
     # cons += [D_rho @ X[:n,n:n+m] @ m1 >= (m-r) * X[n+m,n:n+m]] # (1,2)
@@ -133,6 +131,7 @@ def misp_sdp(D_rho, w, r, feas = False, x_test = True):
     # cons += [(D_rho @ X[:n,[n+m]]) @ n1_s.T >= X[:n,n:n+m].T] # (2,3)
     # cons += [m1 @ X[n:n+m,n+m] * m1 >= X[n:n+m,n+m] * (m-r)] # (1,3)
     # cons += [m1 @ X[n:n+m,n+m] * n1 >= X[:n,n+m] * (m-r)] # (1,3)
+
     prob = cp.Problem(obj, cons)
 
     prob.solve()
@@ -198,3 +197,5 @@ def masp_sdp(D_rho, w, r):
     prob.solve()
     return prob.value, X.value
 
+def vertex_cover(K, w):
+    return 0
