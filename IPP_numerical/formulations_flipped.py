@@ -100,7 +100,7 @@ def misp_sdp_flip(D_rho, w, k):
 
 # MISP Flipped
 def misp_flip_group(D, w, k):
-    m,n = D_rho.shape
+    m,n = D.shape
     x = cp.Variable(n)
     t = cp.Variable()
 
@@ -109,7 +109,7 @@ def misp_flip_group(D, w, k):
     for rho in range(m):
         D_rho = make_D_rho(D, rho)
         y_rho = cp.Variable(m - 1, boolean = True)
-        cons += [D_rho @ x <= y_rho, cp.sum(y_rho) >= t]
+        cons += [D_rho @ x >= y_rho, cp.sum(y_rho) >= t]
 
     prob = cp.Problem(obj, cons)
     prob.solve()
@@ -117,16 +117,16 @@ def misp_flip_group(D, w, k):
     return val, x.value
 
 def misp_flip_group_lp(D, w, k):
-    m,n = D_rho.shape
+    m,n = D.shape
     x = cp.Variable(n)
     t = cp.Variable()
 
     obj = cp.Maximize(t)
-    cons = [w @ x <= k. x >= 0, x <= 1]
+    cons = [w @ x <= k, x >= 0, x <= 1]
     for rho in range(m):
         D_rho = make_D_rho(D, rho)
         y_rho = cp.Variable(m - 1)
-        cons += [D_rho @ x <= y_rho, cp.sum(y_rho) >= t]
+        cons += [D_rho @ x >= y_rho, cp.sum(y_rho) >= t]
         cons += [y_rho >= 0, y_rho <= 1]
         for j in range(m - 1):
             for i in range(n):

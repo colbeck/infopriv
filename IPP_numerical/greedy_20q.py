@@ -67,7 +67,7 @@ def monte_carlo_simulation(trials, p, m, n, k):
     min_ri_list_optimal = []
     
     for _ in range(trials):
-        data = generate_data(p, m, n)
+        data = generate_data(m, n, p)
         # print(data)
         
         # Compute greedy value
