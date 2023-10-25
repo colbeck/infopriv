@@ -116,11 +116,14 @@ def misp_sdp(D_rho, w, r, feas = False, x_test = True):
     for j in range(n, n+m):
         cons += [X[j,j] == X[n+m,j]]
     cons += [X[m+n,m+n] == 1]
+    cons += [cp.sum(X[n:n+m,n:n+m]) >= (m-r)**2] # new constraint
     for i in range(n):
         for j in range(m):
             if np.allclose(D_rho[j,i], 1):
                 cons += [X[i,n+j] == X[n+m,i]]
                 cons += [X[n+m,n+j] >= X[n+m,i]]
+
+                
                 # cons += [X[n+j,n+j] - 2 * X[i, n+j] + X[i,i] >= 0] # (3,3)
                 # cons += [X[i, n+j] <= X[n+j,n+j]]
                 # cons += [X[i, n+j] <= X[i,i]]
@@ -197,5 +200,3 @@ def masp_sdp(D_rho, w, r):
     prob.solve()
     return prob.value, X.value
 
-def vertex_cover(K, w):
-    return 0
